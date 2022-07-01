@@ -76,7 +76,6 @@ const performUnitOfWork = (fiber) => {
     }
 
     prevSibling = newFiber;
-    console.log({ prevSibling })
     index++;
   }
 
