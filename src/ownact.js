@@ -56,12 +56,9 @@ const performUnitOfWork = (fiber) => {
   }
 
   const elements = fiber.props.children;
-  let index = 0;
   let prevSibling = null;
 
-  while (index < elements.length) {
-    const element = elements[index];
-
+  elements.forEach((element, index) => {
     const newFiber = {
       type: element.type,
       props: element.props,
@@ -76,8 +73,7 @@ const performUnitOfWork = (fiber) => {
     }
 
     prevSibling = newFiber;
-    index++;
-  }
+  })
 
   if (fiber.child) {
     return fiber.child;
