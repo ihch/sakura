@@ -8,6 +8,9 @@ const element = (
   <div id="foo">
     <a>bar</a>
     <b />
+    <c>
+      <d />
+    </c>
   </div>
 );
 
