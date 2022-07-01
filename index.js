@@ -1,4 +1,4 @@
-const createElement = (type, props, ...children) => {
+export const createElement = (type, props, ...children) => {
   return {
     type,
     props: {
@@ -7,11 +7,3 @@ const createElement = (type, props, ...children) => {
     },
   }
 }
-
-const div = createElement("div");
-const divWithChild = createElement("div", null, "a");
-const divWithChildren = createElement("div", null, "a", "b");
-
-console.log(div)
-console.log(divWithChild)
-console.log(divWithChildren)
