@@ -26,7 +26,15 @@ describe('createElement', () => {
     expect(createElement('div', null, "a")).toStrictEqual({
       type: 'div',
       props: {
-        children: ["a"],
+        children: [
+          {
+            type: "TEXT_ELEMENT",
+            props: {
+              nodeValue: "a",
+              children: [],
+            }
+          }
+        ],
       }
     });
   });
