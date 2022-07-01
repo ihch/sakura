@@ -1,6 +1,6 @@
 import { expect, describe, it } from 'vitest';
 
-import { createElement } from '.';
+import { createElement } from './ownact';
 
 describe('createElement', () => {
   it('create element', async () => {
