@@ -71,30 +71,35 @@ const workLoop = (deadline) => {
   requestIdleCallback(workLoop);
 }
 
-const performUnitOfWork = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDOM(fiber)
-  }
+const reconcileChildren = (progressFiber, elements) => {
+  // TODO DOMの差分比較をする
 
-  const elements = fiber.props.children;
   let prevSibling = null;
 
   elements.forEach((element, index) => {
     const newFiber = {
       type: element.type,
       props: element.props,
-      parent: fiber,
+      parent: progressFiber,
       dom: null,
     }
 
     if (index === 0) {
-      fiber.child = newFiber;
+      progressFiber.child = newFiber;
     } else {
       prevSibling.sibling = newFiber;
     }
 
     prevSibling = newFiber;
-  })
+  });
+}
+
+const performUnitOfWork = (fiber) => {
+  if (!fiber.dom) {
+    fiber.dom = createDOM(fiber)
+  }
+
+  reconcileChildren(fiber, fiber.props.children);
 
   if (fiber.child) {
     return fiber.child;
