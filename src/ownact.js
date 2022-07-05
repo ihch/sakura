@@ -51,10 +51,6 @@ const performUnitOfWork = (fiber) => {
     fiber.dom = createDOM(fiber)
   }
 
-  if (fiber.parent) {
-    fiber.parent.dom.appendChild(fiber.dom);
-  }
-
   const elements = fiber.props.children;
   let prevSibling = null;
 
