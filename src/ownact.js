@@ -35,6 +35,26 @@ const createDOM = (fiber) => {
   return dom;
 }
 
+const commitWork = (fiber) => {
+  if (!fiber) {
+    return;
+  }
+
+  // 親ノードに対してノードを追加
+  const parentDom = fiber.parent.dom;
+  parentDom.appendChild(fiber.dom);
+
+  // ノードが持つ子要素をDOMに反映
+  commitWork(fiber.child);
+  // ノードの兄弟要素をDOMに反映
+  commitWork(fiber.sibling);
+}
+
+const commitRoot = () => {
+  commitWork(progressRoot.child);
+  progressRoot = null;
+}
+
 const workLoop = (deadline) => {
   let shouldYield = false;
 
@@ -43,16 +63,17 @@ const workLoop = (deadline) => {
     shouldYield = deadline.timeRemaining() < 1;
   }
 
+  // ノードの生成作業が終了したらDOMツリーに反映する
+  if (!nextUnitOfWork && progressRoot) {
+    commitRoot();
+  }
+
   requestIdleCallback(workLoop);
 }
 
 const performUnitOfWork = (fiber) => {
   if (!fiber.dom) {
     fiber.dom = createDOM(fiber)
-  }
-
-  if (fiber.parent) {
-    fiber.parent.dom.appendChild(fiber.dom);
   }
 
   const elements = fiber.props.children;
@@ -88,15 +109,20 @@ const performUnitOfWork = (fiber) => {
   }
 }
 
+// 描画処理をするノード
 let nextUnitOfWork = null;
+// 描画処理をしているDOMツリーのルートノード
+let progressRoot = null;
 
 const render = (element, container) => {
-  nextUnitOfWork = {
+  progressRoot = {
     dom: container,
     props: {
       children: [element],
     },
   };
+
+  nextUnitOfWork = progressRoot;
 
   requestIdleCallback(workLoop);
 };
