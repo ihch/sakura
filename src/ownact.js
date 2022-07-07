@@ -131,13 +131,6 @@ const reconcileChildren = (progressFiber, elements) => {
       oldFiber = oldFiber.sibling;
     }
 
-    newFiber = {
-      type: element.type,
-      props: element.props,
-      parent: progressFiber,
-      dom: null,
-    }
-
     if (oldFiber) {
       oldFiber = oldFiber.sibling;
     }
