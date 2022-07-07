@@ -176,10 +176,6 @@ const reconcileChildren = (progressFiber, elements) => {
       oldFiber = oldFiber.sibling;
     }
 
-    if (oldFiber) {
-      oldFiber = oldFiber.sibling;
-    }
-
     if (index === 0) {
       progressFiber.child = newFiber;
     } else {
