@@ -25,12 +25,7 @@ const createDOM = (fiber) => {
     ? document.createTextNode('')
     : document.createElement(fiber.type);
 
-  const isProperty = key => key !== 'children';
-  Object.keys(fiber.props)
-    .filter(isProperty)
-    .forEach((name) => {
-      dom[name] = fiber.props[name];
-    });
+  updateDOM(dom, {}, fiber.props);
 
   return dom;
 }
@@ -142,6 +137,7 @@ const reconcileChildren = (progressFiber, elements) => {
 
     // 差分検出をしているところ。Reactではkeyの確認とかもして効率化している
     const sameType = oldFiber && element && element.type == oldFiber.type;
+
 
     // 同じelementタイプ(h1など)のノードならデータの更新のみ
     if (sameType) {
