@@ -183,7 +183,48 @@ const reconcileChildren = (progressFiber, elements) => {
   };
 }
 
+let progressFiber = null;
+let hookIndex = null;
+
+const useState = (initialState) => {
+  const oldHook = progressFiber.alternate
+    && progressFiber.alternate.hooks
+    && progressFiber.alternate.hooks[hookIndex];
+
+  const hook = {
+    state: oldHook ? oldHook.state : initialState,
+    queue: [],
+  };
+
+  const actions = oldHook ? oldHook.queue : [];
+  actions.forEach((action) => {
+    hook.state = action(hook.state);
+  });
+
+  const setState = (action) => {
+    hook.queue.push(action);
+
+    // render関数と同じように変更が起きたノードを次の描画処理として指定する
+    progressRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      alternate: currentRoot,
+      flag: true,
+    };
+    nextUnitOfWork = progressRoot;
+    deletions = [];
+  }
+
+  progressFiber.hooks.push(hook);
+  hookIndex++;
+  return [hook.state, setState];
+}
+
 const updateFunctionComponent = (fiber) => {
+  progressFiber = fiber;
+  hookIndex = 0;
+  progressFiber.hooks = [];
+
   // JSX変換の仕様で関数コンポーネントにはDOMノードがつかない
   // 関数コンポーネントは変換済みのJSXを返すので、それを子要素としてfiberにする
   const children = [fiber.type(fiber.props)];
@@ -246,6 +287,7 @@ const render = (element, container) => {
 const Ownact = {
   createElement,
   render,
+  useState,
 };
 
 export default Ownact;
