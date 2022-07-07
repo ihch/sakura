@@ -35,8 +35,43 @@ const createDOM = (fiber) => {
   return dom;
 }
 
+const isEvent = key => key.startsWith('on')
+const isProperty = key => key !== 'children' && !isEvent(key);
+const isNew = (prev, next) => (key) => prev[key] !== next[key];
+const isGone = (_prev, next) => (key) => !(key in next);
+
 const updateDOM = (dom, prevProps, nextProps) => {
-  // TODO DOMの更新処理
+  // 古いプロパティを削除する
+  Object.keys(prevProps)
+    .filter(isProperty)
+    .filter(isGone(prevProps, nextProps))
+    .forEach((name) => { dom[name] = '' });
+
+  // 新しいプロパティ・変更されたプロパティを設定
+  Object.keys(prevProps)
+    .filter(isProperty)
+    .filter(isNew(prev, next))
+    .forEach((name) => { dom[name] = nextProps[name] });
+
+  // 必要ない・変更されたイベントリスナーの削除
+  Object.keys(prevProps)
+    .filter(isEvent)
+    .filter(
+      key => !(key in nextProps) || isNew(prevProps, nextProps)(key)
+    )
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    });
+
+  // 新しい・変更されたイベントリスナーの追加
+  Object.keys(nextProps)
+    .filter(isEvent)
+    .filter(isNew(prevProps, nextProps))
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    });
 }
 
 const commitWork = (fiber) => {
@@ -97,7 +132,6 @@ const reconcileChildren = (progressFiber, elements) => {
 
     // 同じelementタイプ(h1など)のノードならデータの更新のみ
     if (sameType) {
-      // TODO update node
       newFiber = {
         type: oldFiber.type,
         props: element.props,
@@ -109,7 +143,6 @@ const reconcileChildren = (progressFiber, elements) => {
     }
     // elementタイプが違う別の要素なら新しいノードを追加する
     if (!sameType && element) {
-      // TODO add node
       newFiber = {
         type: element.type,
         props: element.props,
@@ -121,7 +154,6 @@ const reconcileChildren = (progressFiber, elements) => {
     }
     // elementタイプが違い要素がない場合は古いノードを削除する
     if (!sameType && oldFiber) {
-      // TODO delete old node
       oldFiber.effectTag = "DELETION";
       deletions.push(oldFiber);
     }
