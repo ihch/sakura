@@ -48,7 +48,7 @@ const updateDOM = (dom, prevProps, nextProps) => {
     .forEach((name) => { dom[name] = '' });
 
   // 新しいプロパティ・変更されたプロパティを設定
-  Object.keys(prevProps)
+  Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prev, next))
     .forEach((name) => { dom[name] = nextProps[name] });
