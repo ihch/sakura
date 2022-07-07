@@ -74,12 +74,25 @@ const updateDOM = (dom, prevProps, nextProps) => {
     });
 }
 
+const commitDeletion = (fiber, parentDom) => {
+  if (fiber.dom) {
+    parentDom.removeChild(fiber.dom);
+  } else {
+    // DOMノードを持つ子が見つかるまで再帰的に探索する
+    commitDeletion(fiber.child, parentDom);
+  }
+}
+
 const commitWork = (fiber) => {
   if (!fiber) {
     return;
   }
 
-  const parentDom = fiber.parent.dom;
+  // DOMノードを持つfiberが見つかるまでfiberツリーを上に移動する
+  // DOMノードを持たないfiber -> 関数コンポーネント
+  let parentDomFiber = fiber.parent;
+  while (!parentDomFiber.dom) { parentDomFiber = parentDomFiber.parent }
+  const parentDom = parentDomFiber.dom;
 
   if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
     // 親ノードに対してノードを追加
@@ -87,7 +100,7 @@ const commitWork = (fiber) => {
   } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
     updateDOM(fiber.dom, fiber.alternate.props, fiber.props);
   } else if (fiber.effectTag === 'DELETION') {
-    parentDom.removeChild(fiber.dom);
+    commitDeletion(fiber, parentDom);
   }
 
   // ノードが持つ子要素をDOMに反映
@@ -178,12 +191,28 @@ const reconcileChildren = (progressFiber, elements) => {
   };
 }
 
-const performUnitOfWork = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDOM(fiber)
-  }
+const updateFunctionComponent = (fiber) => {
+  // JSX変換の仕様で関数コンポーネントにはDOMノードがつかない
+  // 関数コンポーネントは変換済みのJSXを返すので、それを子要素としてfiberにする
+  const children = [fiber.type(fiber.props)];
+  reconcileChildren(fiber, children);
+}
 
+const updateHostComponent = (fiber) => {
+  if (!fiber.dom) {
+    fiber.dom = createDOM(fiber);
+  }
   reconcileChildren(fiber, fiber.props.children);
+}
+
+const performUnitOfWork = (fiber) => {
+  const isFunctionComponent = (fiber) => fiber.type instanceof Function;
+
+  if (isFunctionComponent(fiber)) {
+    updateFunctionComponent(fiber);
+  } else {
+    updateHostComponent(fiber);
+  }
 
   if (fiber.child) {
     return fiber.child;
