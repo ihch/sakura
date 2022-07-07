@@ -35,14 +35,60 @@ const createDOM = (fiber) => {
   return dom;
 }
 
+const isEvent = key => key.startsWith('on')
+const isProperty = key => key !== 'children' && !isEvent(key);
+const isNew = (prev, next) => (key) => prev[key] !== next[key];
+const isGone = (_prev, next) => (key) => !(key in next);
+
+const updateDOM = (dom, prevProps, nextProps) => {
+  // 古いプロパティを削除する
+  Object.keys(prevProps)
+    .filter(isProperty)
+    .filter(isGone(prevProps, nextProps))
+    .forEach((name) => { dom[name] = '' });
+
+  // 新しいプロパティ・変更されたプロパティを設定
+  Object.keys(prevProps)
+    .filter(isProperty)
+    .filter(isNew(prev, next))
+    .forEach((name) => { dom[name] = nextProps[name] });
+
+  // 必要ない・変更されたイベントリスナーの削除
+  Object.keys(prevProps)
+    .filter(isEvent)
+    .filter(
+      key => !(key in nextProps) || isNew(prevProps, nextProps)(key)
+    )
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    });
+
+  // 新しい・変更されたイベントリスナーの追加
+  Object.keys(nextProps)
+    .filter(isEvent)
+    .filter(isNew(prevProps, nextProps))
+    .forEach((name) => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    });
+}
+
 const commitWork = (fiber) => {
   if (!fiber) {
     return;
   }
 
-  // 親ノードに対してノードを追加
   const parentDom = fiber.parent.dom;
-  parentDom.appendChild(fiber.dom);
+
+  if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
+    // 親ノードに対してノードを追加
+    parentDom.appendChild(fiber.dom);
+  } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
+    updateDOM(fiber.dom, fiber.alternate.props, fiber.props);
+  } else if (fiber.effectTag === 'DELETION') {
+    parentDom.removeChild(fiber.dom);
+  }
 
   // ノードが持つ子要素をDOMに反映
   commitWork(fiber.child);
@@ -52,6 +98,7 @@ const commitWork = (fiber) => {
 
 const commitRoot = () => {
   commitWork(progressRoot.child);
+  currentRoot = progressRoot;
   progressRoot = null;
 }
 
@@ -71,30 +118,72 @@ const workLoop = (deadline) => {
   requestIdleCallback(workLoop);
 }
 
-const performUnitOfWork = (fiber) => {
-  if (!fiber.dom) {
-    fiber.dom = createDOM(fiber)
-  }
-
-  const elements = fiber.props.children;
+const reconcileChildren = (progressFiber, elements) => {
+  let index = 0;
   let prevSibling = null;
+  let oldFiber = progressFiber.alternate && progressFiber.alternate.child;
 
-  elements.forEach((element, index) => {
-    const newFiber = {
-      type: element.type,
-      props: element.props,
-      parent: fiber,
-      dom: null,
+  while (index < elements.length || oldFiber != null) {
+    const element = elements[index];
+    let newFiber = null;
+
+    // 差分検出をしているところ。Reactではkeyの確認とかもして効率化している
+    const sameType = oldFiber && element && element.type == oldFiber.type;
+
+    // 同じelementタイプ(h1など)のノードならデータの更新のみ
+    if (sameType) {
+      newFiber = {
+        type: oldFiber.type,
+        props: element.props,
+        dom: oldFiber.dom,
+        parent: progressFiber,
+        alternate: oldFiber,
+        effectTag: "UPDATE",
+      };
+    }
+    // elementタイプが違う別の要素なら新しいノードを追加する
+    if (!sameType && element) {
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        dom: null,
+        parent: progressFiber,
+        alternate: null,
+        effectTag: "PLACEMENT",
+      };
+    }
+    // elementタイプが違い要素がない場合は古いノードを削除する
+    if (!sameType && oldFiber) {
+      oldFiber.effectTag = "DELETION";
+      deletions.push(oldFiber);
+    }
+
+    // 注目する古いノードを次の要素にする
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
+    }
+
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
     }
 
     if (index === 0) {
-      fiber.child = newFiber;
+      progressFiber.child = newFiber;
     } else {
       prevSibling.sibling = newFiber;
     }
 
     prevSibling = newFiber;
-  })
+    index++;
+  };
+}
+
+const performUnitOfWork = (fiber) => {
+  if (!fiber.dom) {
+    fiber.dom = createDOM(fiber)
+  }
+
+  reconcileChildren(fiber, fiber.props.children);
 
   if (fiber.child) {
     return fiber.child;
@@ -113,6 +202,10 @@ const performUnitOfWork = (fiber) => {
 let nextUnitOfWork = null;
 // 描画処理をしているDOMツリーのルートノード
 let progressRoot = null;
+// 差分比較に利用する最後にコミットしたDOMツリー
+let currentRoot = null;
+// 新しいDOMツリーから削除されたノードを仮想DOMツリーに反映するため記憶する
+let deletions = null;
 
 const render = (element, container) => {
   progressRoot = {
@@ -120,8 +213,10 @@ const render = (element, container) => {
     props: {
       children: [element],
     },
+    alternate: currentRoot,
   };
 
+  deletions = [];
   nextUnitOfWork = progressRoot;
 
   requestIdleCallback(workLoop);
