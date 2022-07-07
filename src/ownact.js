@@ -50,7 +50,7 @@ const updateDOM = (dom, prevProps, nextProps) => {
   // 新しいプロパティ・変更されたプロパティを設定
   Object.keys(nextProps)
     .filter(isProperty)
-    .filter(isNew(prev, next))
+    .filter(isNew(prevProps, nextProps))
     .forEach((name) => { dom[name] = nextProps[name] });
 
   // 必要ない・変更されたイベントリスナーの削除
