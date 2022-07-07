@@ -35,14 +35,25 @@ const createDOM = (fiber) => {
   return dom;
 }
 
+const updateDOM = (dom, prevProps, nextProps) => {
+  // TODO DOMの更新処理
+}
+
 const commitWork = (fiber) => {
   if (!fiber) {
     return;
   }
 
-  // 親ノードに対してノードを追加
   const parentDom = fiber.parent.dom;
-  parentDom.appendChild(fiber.dom);
+
+  if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
+    // 親ノードに対してノードを追加
+    parentDom.appendChild(fiber.dom);
+  } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
+    updateDOM(fiber.dom, fiber.alternate.props, fiber.props);
+  } else if (fiber.effectTag === 'DELETION') {
+    parentDom.removeChild(fiber.dom);
+  }
 
   // ノードが持つ子要素をDOMに反映
   commitWork(fiber.child);
@@ -52,6 +63,7 @@ const commitWork = (fiber) => {
 
 const commitRoot = () => {
   commitWork(progressRoot.child);
+  currentRoot = progressRoot;
   progressRoot = null;
 }
 
@@ -72,16 +84,62 @@ const workLoop = (deadline) => {
 }
 
 const reconcileChildren = (progressFiber, elements) => {
-  // TODO DOMの差分比較をする
-
+  let index = 0;
   let prevSibling = null;
+  let oldFiber = progressFiber.alternate && progressFiber.alternate.child;
 
-  elements.forEach((element, index) => {
-    const newFiber = {
+  while (index < elements.length || oldFiber != null) {
+    const element = elements[index];
+    let newFiber = null;
+
+    // 差分検出をしているところ。Reactではkeyの確認とかもして効率化している
+    const sameType = oldFiber && element && element.type == oldFiber.type;
+
+    // 同じelementタイプ(h1など)のノードならデータの更新のみ
+    if (sameType) {
+      // TODO update node
+      newFiber = {
+        type: oldFiber.type,
+        props: element.props,
+        dom: oldFiber.dom,
+        parent: progressFiber,
+        alternate: oldFiber,
+        effectTag: "UPDATE",
+      };
+    }
+    // elementタイプが違う別の要素なら新しいノードを追加する
+    if (!sameType && element) {
+      // TODO add node
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        dom: null,
+        parent: progressFiber,
+        alternate: null,
+        effectTag: "PLACEMENT",
+      };
+    }
+    // elementタイプが違い要素がない場合は古いノードを削除する
+    if (!sameType && oldFiber) {
+      // TODO delete old node
+      oldFiber.effectTag = "DELETION";
+      deletions.push(oldFiber);
+    }
+
+    // 注目する古いノードを次の要素にする
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
+    }
+
+    newFiber = {
       type: element.type,
       props: element.props,
       parent: progressFiber,
       dom: null,
+    }
+
+    if (oldFiber) {
+      oldFiber = oldFiber.sibling;
     }
 
     if (index === 0) {
@@ -91,7 +149,8 @@ const reconcileChildren = (progressFiber, elements) => {
     }
 
     prevSibling = newFiber;
-  });
+    index++;
+  };
 }
 
 const performUnitOfWork = (fiber) => {
@@ -118,6 +177,10 @@ const performUnitOfWork = (fiber) => {
 let nextUnitOfWork = null;
 // 描画処理をしているDOMツリーのルートノード
 let progressRoot = null;
+// 差分比較に利用する最後にコミットしたDOMツリー
+let currentRoot = null;
+// 新しいDOMツリーから削除されたノードを仮想DOMツリーに反映するため記憶する
+let deletions = null;
 
 const render = (element, container) => {
   progressRoot = {
@@ -125,8 +188,10 @@ const render = (element, container) => {
     props: {
       children: [element],
     },
+    alternate: currentRoot,
   };
 
+  deletions = [];
   nextUnitOfWork = progressRoot;
 
   requestIdleCallback(workLoop);
