@@ -1,16 +1,16 @@
-const createElement = (type, props, ...children) => {
+const createElement = (type, props, ...children: Children) => {
   return {
     type,
     props: {
       ...props,
-      children: children.map((child) =>
+      children: children.map((child: Element) =>
         typeof child === 'object' ? child : createTextElement(child)
       ),
     },
   };
 }
 
-const createTextElement = (text) => {
+const createTextElement = (text: string) => {
   return {
     type: "TEXT_ELEMENT",
     props: {
@@ -126,7 +126,7 @@ const workLoop = (deadline) => {
   requestIdleCallback(workLoop);
 }
 
-const reconcileChildren = (progressFiber, elements) => {
+const reconcileChildren = (progressFiber, elements: Children) => {
   let index = 0;
   let prevSibling = null;
   let oldFiber = progressFiber.alternate && progressFiber.alternate.child;
@@ -269,7 +269,21 @@ let currentRoot = null;
 // 新しいDOMツリーから削除されたノードを仮想DOMツリーに反映するため記憶する
 let deletions = null;
 
-const render = (element, container) => {
+type Element<T = {}> = {
+  child: Element | string;
+  type: 'TEXT_ELEMENT' | string;
+  props: T;
+};
+
+type Child = Element;
+
+type Children = Child[];
+
+declare type Ownact = {
+  Element: Element
+}
+
+const render = (element: Element, container: HTMLElement) => {
   progressRoot = {
     dom: container,
     props: {
