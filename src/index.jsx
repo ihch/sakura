@@ -9,8 +9,23 @@ const App = () => {
     <div id="foo">
       <div>
         <p>{count}</p>
-        <button type="button" onClick={() => { setCount((prev) => prev + 1); console.log(count) }}>count up</button>
-        <button type="button" onClick={() => { console.log("hoge") }}>hoge</button>
+        <button
+          type="button"
+          onClick={() => {
+            setCount((prev) => prev + 1);
+            console.log(count);
+          }}
+        >
+          count up
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            console.log('hoge');
+          }}
+        >
+          hoge
+        </button>
       </div>
       <a>bar</a>
       <b />
@@ -18,8 +33,8 @@ const App = () => {
         <d />
       </c>
     </div>
-  )
-}
+  );
+};
 
 const element = <App />;
 

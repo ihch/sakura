@@ -3,22 +3,20 @@ const createElement = (type: FiberType | FunctionComponent, props: any, ...child
     type,
     props: {
       ...props,
-      children: children.map((child: Element) =>
-        typeof child === 'object' ? child : createTextElement(child)
-      ),
+      children: children.map((child: Element) => (typeof child === 'object' ? child : createTextElement(child))),
     },
   };
-}
+};
 
 const createTextElement = (text: string) => {
   return {
-    type: "TEXT_ELEMENT",
+    type: 'TEXT_ELEMENT',
     props: {
       nodeValue: text,
-      children: []
-    }
+      children: [],
+    },
   };
-}
+};
 
 const domCreator = (type: FiberType | FunctionComponent | null) => {
   if (type instanceof Function) {
@@ -31,15 +29,15 @@ const domCreator = (type: FiberType | FunctionComponent | null) => {
     return document.createElement(type);
   }
   return null;
-}
+};
 
 const createDOM = (fiber: Fiber) => {
   const dom = domCreator(fiber.type);
   dom && updateDOM(dom, {}, fiber.props);
   return dom;
-}
+};
 
-const isEvent = (key: string) => key.startsWith('on')
+const isEvent = (key: string) => key.startsWith('on');
 const isProperty = (key: string) => key !== 'children' && !isEvent(key);
 const isNew = (prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => prev[key] !== next[key];
 const isGone = (_prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => !(key in next);
@@ -50,21 +48,23 @@ const updateDOM = (dom: HTMLElement | Text, prevProps: any, nextProps: any) => {
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
     // @ts-ignore TODO: いい感じにする
-    .forEach((name) => { dom[name] = '' });
+    .forEach((name) => {
+      dom[name] = '';
+    });
 
   // 新しいプロパティ・変更されたプロパティを設定
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     // @ts-ignore TODO: いい感じにする
-    .forEach((name) => { dom[name] = nextProps[name] });
+    .forEach((name) => {
+      dom[name] = nextProps[name];
+    });
 
   // 必要ない・変更されたイベントリスナーの削除
   Object.keys(prevProps)
     .filter(isEvent)
-    .filter(
-      key => !(key in nextProps) || isNew(prevProps, nextProps)(key)
-    )
+    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
     .forEach((name) => {
       const eventType = name.toLowerCase().substring(2);
       dom.removeEventListener(eventType, prevProps[name]);
@@ -78,7 +78,7 @@ const updateDOM = (dom: HTMLElement | Text, prevProps: any, nextProps: any) => {
       const eventType = name.toLowerCase().substring(2);
       dom.addEventListener(eventType, nextProps[name]);
     });
-}
+};
 
 const commitDeletion = (fiber: Fiber, parentDom: HTMLElement | Text) => {
   if (fiber.dom) {
@@ -87,7 +87,7 @@ const commitDeletion = (fiber: Fiber, parentDom: HTMLElement | Text) => {
     // DOMノードを持つ子が見つかるまで再帰的に探索する
     fiber.child && commitDeletion(fiber.child, parentDom);
   }
-}
+};
 
 const commitWork = (fiber: Fiber) => {
   if (!fiber) {
@@ -97,7 +97,9 @@ const commitWork = (fiber: Fiber) => {
   // DOMノードを持つfiberが見つかるまでfiberツリーを上に移動する
   // DOMノードを持たないfiber -> 関数コンポーネント
   let parentDomFiber = fiber.parent;
-  while (!parentDomFiber?.dom) { parentDomFiber = parentDomFiber?.parent || null }
+  while (!parentDomFiber?.dom) {
+    parentDomFiber = parentDomFiber?.parent || null;
+  }
   const parentDom = parentDomFiber.dom;
 
   if (fiber.effectTag === 'PLACEMENT' && fiber.dom != null) {
@@ -113,13 +115,13 @@ const commitWork = (fiber: Fiber) => {
   fiber.child && commitWork(fiber.child);
   // ノードの兄弟要素をDOMに反映
   fiber.sibling && commitWork(fiber.sibling);
-}
+};
 
 const commitRoot = () => {
   progressRoot && progressRoot.child && commitWork(progressRoot.child);
   currentRoot = progressRoot;
   progressRoot = null;
-}
+};
 
 const workLoop: IdleRequestCallback = (deadline) => {
   let shouldYield = false;
@@ -135,7 +137,7 @@ const workLoop: IdleRequestCallback = (deadline) => {
   }
 
   requestIdleCallback(workLoop);
-}
+};
 
 const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
   let index = 0;
@@ -149,7 +151,6 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
     // 差分検出をしているところ。Reactではkeyの確認とかもして効率化している
     const sameType = oldFiber && element && element.type == oldFiber.type;
 
-
     // 同じelementタイプ(h1など)のノードならデータの更新のみ
     if (oldFiber && sameType) {
       newFiber = {
@@ -159,7 +160,7 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
         dom: oldFiber.dom,
         parent: progressFiber,
         alternate: oldFiber,
-        effectTag: "UPDATE",
+        effectTag: 'UPDATE',
       };
     }
     // elementタイプが違う別の要素なら新しいノードを追加する
@@ -170,7 +171,7 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
         dom: null,
         parent: progressFiber,
         alternate: null,
-        effectTag: "PLACEMENT",
+        effectTag: 'PLACEMENT',
         child: null,
         sibling: null,
         hooks: [],
@@ -179,7 +180,7 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
     }
     // elementタイプが違い要素がない場合は古いノードを削除する
     if (!sameType && oldFiber) {
-      oldFiber.effectTag = "DELETION";
+      oldFiber.effectTag = 'DELETION';
       deletions.push(oldFiber);
     }
 
@@ -196,8 +197,8 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
 
     prevSibling = newFiber;
     index++;
-  };
-}
+  }
+};
 
 let progressFiber: Fiber | null = null;
 let hookIndex: number = 0;
@@ -206,9 +207,7 @@ const useState = <T>(initialState: T) => {
   if (!progressFiber) {
     return;
   }
-  const oldHook = progressFiber.alternate
-    && progressFiber.alternate.hooks
-    && progressFiber.alternate.hooks[hookIndex];
+  const oldHook = progressFiber.alternate && progressFiber.alternate.hooks && progressFiber.alternate.hooks[hookIndex];
 
   const hook: Hook = {
     state: oldHook ? oldHook.state : initialState,
@@ -236,12 +235,12 @@ const useState = <T>(initialState: T) => {
     };
     nextUnitOfWork = progressRoot;
     deletions = [];
-  }
+  };
 
   progressFiber.hooks.push(hook);
   hookIndex++;
   return [hook.state, setState];
-}
+};
 
 const updateFunctionComponent = (fiber: Fiber, type: FunctionComponent) => {
   progressFiber = fiber;
@@ -252,20 +251,21 @@ const updateFunctionComponent = (fiber: Fiber, type: FunctionComponent) => {
   // 関数コンポーネントは変換済みのJSXを返すので、それを子要素としてfiberにする
   const children = [type(fiber.props)];
   reconcileChildren(fiber, children);
-}
+};
 
 const updateHostComponent = (fiber: Fiber) => {
   if (!fiber.dom) {
     const hoge = createDOM(fiber);
     if (hoge) {
-      fiber.dom = hoge
+      fiber.dom = hoge;
     }
   }
   reconcileChildren(fiber, fiber.props.children || []);
-}
+};
 
 const performUnitOfWork = (fiber: Fiber) => {
-  const isFunctionComponent = (type: FiberType | FunctionComponent | null): type is Function => type instanceof Function;
+  const isFunctionComponent = (type: FiberType | FunctionComponent | null): type is Function =>
+    type instanceof Function;
 
   if (isFunctionComponent(fiber.type)) {
     updateFunctionComponent(fiber, fiber.type);
@@ -285,7 +285,7 @@ const performUnitOfWork = (fiber: Fiber) => {
     nextFiber = nextFiber.parent;
   }
   return null;
-}
+};
 
 // 描画処理をするノード
 let nextUnitOfWork: Fiber | null = null;
@@ -316,7 +316,7 @@ type FiberEffectTag = 'PLACEMENT' | 'UPDATE' | 'DELETION';
 type Hook = {
   queue: Function[];
   state: any;
-}
+};
 
 type Fiber = {
   type: FiberType | FunctionComponent | null;

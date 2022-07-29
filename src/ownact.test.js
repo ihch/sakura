@@ -8,7 +8,7 @@ describe('createElement', () => {
       type: 'div',
       props: {
         children: [],
-      }
+      },
     });
   });
 
@@ -16,26 +16,26 @@ describe('createElement', () => {
     expect(createElement('div', { text: 'hello' })).toStrictEqual({
       type: 'div',
       props: {
-        text: "hello",
+        text: 'hello',
         children: [],
-      }
+      },
     });
   });
 
   it('create element with children', async () => {
-    expect(createElement('div', null, "a")).toStrictEqual({
+    expect(createElement('div', null, 'a')).toStrictEqual({
       type: 'div',
       props: {
         children: [
           {
-            type: "TEXT_ELEMENT",
+            type: 'TEXT_ELEMENT',
             props: {
-              nodeValue: "a",
+              nodeValue: 'a',
               children: [],
-            }
-          }
+            },
+          },
         ],
-      }
+      },
     });
   });
-})
+});
