@@ -30,10 +30,10 @@ const createDOM = (fiber) => {
   return dom;
 }
 
-const isEvent = key => key.startsWith('on')
-const isProperty = key => key !== 'children' && !isEvent(key);
-const isNew = (prev, next) => (key) => prev[key] !== next[key];
-const isGone = (_prev, next) => (key) => !(key in next);
+const isEvent = (key: string) => key.startsWith('on')
+const isProperty = (key: string) => key !== 'children' && !isEvent(key);
+const isNew = (prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => prev[key] !== next[key];
+const isGone = (_prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => !(key in next);
 
 const updateDOM = (dom, prevProps, nextProps) => {
   // 古いプロパティを削除する
