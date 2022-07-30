@@ -47,8 +47,8 @@ const updateDOM = (dom: HTMLElement | Text, prevProps: any, nextProps: any) => {
   Object.keys(prevProps)
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
-    // @ts-ignore TODO: いい感じにする
     .forEach((name) => {
+      // @ts-ignore TODO: いい感じにする
       dom[name] = '';
     });
 
@@ -56,8 +56,8 @@ const updateDOM = (dom: HTMLElement | Text, prevProps: any, nextProps: any) => {
   Object.keys(nextProps)
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
-    // @ts-ignore TODO: いい感じにする
     .forEach((name) => {
+      // @ts-ignore TODO: いい感じにする
       dom[name] = nextProps[name];
     });
 
