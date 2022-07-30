@@ -203,13 +203,10 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
 let progressFiber: Fiber | null = null;
 let hookIndex: number = 0;
 
-const useState = <T>(initialState: T) => {
-  if (!progressFiber) {
-    return;
-  }
-  const oldHook = progressFiber.alternate && progressFiber.alternate.hooks && progressFiber.alternate.hooks[hookIndex];
+const useState = <T>(initialState: T): [T, (action: (prev: T) => T) => void] => {
+  const oldHook = progressFiber?.alternate && progressFiber.alternate.hooks && progressFiber.alternate.hooks[hookIndex];
 
-  const hook: Hook = {
+  const hook: Hook<T> = {
     state: oldHook ? oldHook.state : initialState,
     queue: [],
   };
@@ -220,7 +217,7 @@ const useState = <T>(initialState: T) => {
     hook.state = action(hook.state);
   });
 
-  const setState = (action: Function) => {
+  const setState = (action: (prev: T) => T) => {
     hook.queue.push(action);
 
     if (!currentRoot) {
@@ -237,7 +234,7 @@ const useState = <T>(initialState: T) => {
     deletions = [];
   };
 
-  progressFiber.hooks.push(hook);
+  progressFiber?.hooks.push(hook);
   hookIndex++;
   return [hook.state, setState];
 };
@@ -312,10 +309,9 @@ type FiberType = 'TEXT_ELEMENT' | keyof HTMLElementTagNameMap;
 
 type FiberEffectTag = 'PLACEMENT' | 'UPDATE' | 'DELETION';
 
-// TODO: いい感じの型をつける
-type Hook = {
+type Hook<T = any> = {
   queue: Function[];
-  state: any;
+  state: T;
 };
 
 type Fiber = {
