@@ -28,10 +28,6 @@ const App = () => {
         </button>
       </div>
       <a>bar</a>
-      <b />
-      <c>
-        <d />
-      </c>
     </div>
   );
 };
