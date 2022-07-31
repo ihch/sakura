@@ -352,10 +352,10 @@ const render = (element: Element, container: HTMLElement) => {
   requestIdleCallback(workLoop);
 };
 
-const Ownact = {
+const Sakura = {
   createElement,
   render,
   useState,
 };
 
-export default Ownact;
+export default Sakura;

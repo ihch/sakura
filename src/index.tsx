@@ -1,9 +1,9 @@
-import Ownact from './ownact';
+import Sakura from './sakura';
 
 const container = document.getElementById('root');
 
 const App = () => {
-  const [count, setCount] = Ownact.useState(0);
+  const [count, setCount] = Sakura.useState(0);
 
   return (
     <div id="foo">
@@ -34,4 +34,4 @@ const App = () => {
 
 const element = <App />;
 
-Ownact.render(element, container);
+Sakura.render(element, container);
