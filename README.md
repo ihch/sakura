@@ -1,6 +1,6 @@
 # Sakura
 
-Build your own React から React, Lit, Solid を見ながらライブラリを作っていくプロジェクト
+Build your own React から始めて React, Lit, Solid を見ながらライブラリを作っていくプロジェクト
 
 - DOM構築ライブラリを作ってみたい
 - 実装しながら他ライブラリのコンセプトを感じてみる
