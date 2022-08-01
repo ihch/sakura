@@ -9,12 +9,12 @@ Build your own React から始めて React, Lit, Solid を見ながらライブ�
 
 - createElement
 - useState
+- useEffect
 - TypeScript 化
 - 脱 react-script 依存
 
 ### やっていきたいこと
 
-- useEffect
 - CSS in JS の導入 or 実装
 - Router の実装
 - Server Side Rendering
