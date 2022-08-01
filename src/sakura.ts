@@ -201,7 +201,7 @@ const reconcileChildren = (progressFiber: Fiber, elements: Children) => {
 };
 
 let progressFiber: Fiber | null = null;
-let hookIndex: number = 0;
+let hookIndex = 0;
 
 const useState = <T>(initialState: T): [T, (action: (prev: T) => T) => void] => {
   const oldHook = progressFiber?.alternate && progressFiber.alternate.hooks && progressFiber.alternate.hooks[hookIndex];
@@ -213,7 +213,7 @@ const useState = <T>(initialState: T): [T, (action: (prev: T) => T) => void] => 
 
   const actions = oldHook ? oldHook.queue : [];
 
-  actions.forEach((action: Function) => {
+  actions.forEach((action) => {
     hook.state = action(hook.state);
   });
 
@@ -311,7 +311,7 @@ let currentRoot: Fiber | null = null;
 // 新しいDOMツリーから削除されたノードを仮想DOMツリーに反映するため記憶する
 let deletions = null;
 
-type Element<T = {}> = {
+type Element<T = any> = {
   child: Element | string;
   type: FiberType | FunctionComponent | null;
   props: T;
@@ -328,7 +328,7 @@ type FiberType = 'TEXT_ELEMENT' | keyof HTMLElementTagNameMap;
 type FiberEffectTag = 'PLACEMENT' | 'UPDATE' | 'DELETION';
 
 type Hook<T = any> = {
-  queue: Function[];
+  queue: ((prev: T) => T)[];
   state: T;
   dependencies?: any;
 };
