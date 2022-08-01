@@ -257,6 +257,25 @@ const useEffect = (action: Function, dependencies: any[]): void => {
   hookIndex++;
 };
 
+const useMemo = <T>(action: () => T, dependencies: any[]): T => {
+  const oldHook = progressFiber?.alternate && progressFiber.alternate.hooks && progressFiber.alternate.hooks[hookIndex];
+
+  const hook: Hook = {
+    state: oldHook?.state,
+    queue: [],
+    dependencies,
+  };
+
+  // TODO: ちゃんと値・オブジェクトで比較するようにしたい
+  if (dependencies.toString() !== oldHook?.dependencies.toString()) {
+    hook.state = action();
+  }
+
+  progressFiber?.hooks.push(hook);
+  hookIndex++;
+  return hook.state;
+};
+
 const updateFunctionComponent = (fiber: Fiber, type: FunctionComponent) => {
   progressFiber = fiber;
   hookIndex = 0;
@@ -376,6 +395,7 @@ const Sakura = {
   render,
   useState,
   useEffect,
+  useMemo,
 };
 
 export default Sakura;

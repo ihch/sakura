@@ -10,10 +10,15 @@ const App = () => {
     console.log('hello', count1);
   }, [count1]);
 
+  const plus100 = Sakura.useMemo(() => {
+    return count1 + 100;
+  }, [count1]);
+
   return (
     <div id="foo">
       <div>
         <p>count1: {count1}</p>
+        <p>count1 + 100 = {plus100}</p>
         <button
           type="button"
           onClick={() => {
