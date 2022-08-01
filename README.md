@@ -10,6 +10,7 @@ Build your own React から始めて React, Lit, Solid を見ながらライブ�
 - createElement
 - useState
 - useEffect
+- useMemo
 - TypeScript 化
 - 脱 react-script 依存
 
