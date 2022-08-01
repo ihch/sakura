@@ -330,7 +330,7 @@ type Fiber = {
   flag: boolean | null;
 };
 
-const render = (element: Element, container: HTMLElement) => {
+const render = (element: Element, container: HTMLElement | null) => {
   progressRoot = {
     type: null,
     dom: container,
