@@ -20,5 +20,10 @@
   "rules": {
     "semi": ["warn", "always"],
     "quotes": ["warn", "single"]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    }
   }
 }
