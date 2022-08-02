@@ -1,4 +1,5 @@
 import Sakura from './sakura';
+import './index.css';
 
 const container = document.getElementById('root');
 
@@ -17,7 +18,7 @@ const App = () => {
   return (
     <div id="foo">
       <div>
-        <p>count1: {count1}</p>
+        <p className="text-3xl font-bold underline">count1: {count1}</p>
         <p>count1 + 100 = {plus100}</p>
         <button
           type="button"
