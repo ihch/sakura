@@ -13,10 +13,10 @@ Build your own React から始めて React, Lit, Solid を見ながらライブ�
 - useMemo
 - TypeScript 化
 - 脱 react-script 依存
+- CSS in JS の導入 or 実装(TailwindCSSを導入できた)
 
 ### やっていきたいこと
 
-- CSS in JS の導入 or 実装
 - Router の実装
 - Server Side Rendering
 
