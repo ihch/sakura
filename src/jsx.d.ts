@@ -1,6 +1,7 @@
 declare namespace JSX {
   interface DOMAttributes<T> {
     children?: Element;
+    className?: string;
     // TODO: イベントハンドラーとして型をつける
     onClick?: Function;
   }
