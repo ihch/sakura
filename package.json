@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "start": "vite",
     "build": "vite build",
@@ -40,5 +41,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "workspaces": [
+    "sakura",
+    "examples"
+  ]
 }
