@@ -1,4 +1,4 @@
-import Sakura from './sakura';
+import Sakura from 'sakura';
 import './index.css';
 
 const container = document.getElementById('root');

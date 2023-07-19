@@ -2,12 +2,14 @@
   "compilerOptions": {
     "target": "es2020",
     "jsx": "preserve",
-    "module": "commonjs",
+    "module": "es2020",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "outDir": "dist",
+    "declarationDir": "dist/types",
     "paths": {
       "~/*": ["src/*"]
     }
