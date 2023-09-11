@@ -15,7 +15,7 @@
   "author": "ihch",
   "license": "ISC",
   "devDependencies": {
-    "@babel/cli": "^7.18.6",
+    "@babel/cli": "^7.22.15",
     "@babel/core": "^7.18.6",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "autoprefixer": "^10.4.8",
