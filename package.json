@@ -20,7 +20,7 @@
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "autoprefixer": "^10.4.8",
     "c8": "^8.0.0",
-    "eslint": "^8.20.0",
+    "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^3.3.0",
     "eslint-plugin-import": "^2.26.0",
     "postcss": "^8.4.14",
