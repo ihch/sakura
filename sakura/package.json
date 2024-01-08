@@ -6,7 +6,7 @@
   "types": "./src/index.d.ts",
   "devDependencies": {
     "typescript": "^5.1.6",
-    "vitest": "^0.33.0"
+    "vitest": "^1.1.3"
   },
   "scripts": {
     "build": "tsc -d",
