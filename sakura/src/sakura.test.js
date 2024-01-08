@@ -13,7 +13,11 @@ describe('createElement', () => {
   });
 
   it('create element with props', async () => {
-    expect(createElement('div', { text: 'hello' })).toStrictEqual({
+    expect(
+      createElement('div', {
+        text: 'hello',
+      }),
+    ).toStrictEqual({
       type: 'div',
       props: {
         text: 'hello',

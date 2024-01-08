@@ -3,7 +3,17 @@ const createElement = (type: FiberType | FunctionComponent, props: any, ...child
     type,
     props: {
       ...props,
-      children: children.map((child: Element) => (typeof child === 'object' ? child : createTextElement(child))),
+      children: children.map(
+        (
+          child: Element,
+        ) =>
+          typeof child ===
+            'object'
+            ? child
+            : createTextElement(
+              child,
+            ),
+      ),
     },
   };
 };
@@ -39,45 +49,154 @@ const createDOM = (fiber: Fiber) => {
 
 const isEvent = (key: string) => key.startsWith('on');
 const isProperty = (key: string) => key !== 'children' && !isEvent(key);
-const isNew = (prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => prev[key] !== next[key];
-const isGone = (_prev: { [key: string]: any }, next: { [key: string]: any }) => (key: string) => !(key in next);
+const isNew =
+  (
+    prev: {
+      [key: string]: any;
+    },
+    next: {
+      [key: string]: any;
+    },
+  ) =>
+    (key: string) =>
+      prev[key] !== next[key];
+const isGone =
+  (
+    _prev: {
+      [key: string]: any;
+    },
+    next: {
+      [key: string]: any;
+    },
+  ) =>
+    (key: string) =>
+      !(key in next);
 
 const updateDOM = (dom: HTMLElement | Text, prevProps: any, nextProps: any) => {
   // 古いプロパティを削除する
-  Object.keys(prevProps)
-    .filter(isProperty)
-    .filter(isGone(prevProps, nextProps))
-    .forEach((name) => {
-      // @ts-ignore TODO: いい感じにする
-      dom[name] = '';
-    });
+  Object.keys(
+    prevProps,
+  )
+    .filter(
+      isProperty,
+    )
+    .filter(
+      isGone(
+        prevProps,
+        nextProps,
+      ),
+    )
+    .forEach(
+      (
+        name,
+      ) => {
+        // @ts-ignore TODO: いい感じにする
+        dom[
+          name
+        ] =
+          '';
+      },
+    );
 
   // 新しいプロパティ・変更されたプロパティを設定
-  Object.keys(nextProps)
-    .filter(isProperty)
-    .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
-      // @ts-ignore TODO: いい感じにする
-      dom[name] = nextProps[name];
-    });
+  Object.keys(
+    nextProps,
+  )
+    .filter(
+      isProperty,
+    )
+    .filter(
+      isNew(
+        prevProps,
+        nextProps,
+      ),
+    )
+    .forEach(
+      (
+        name,
+      ) => {
+        // @ts-ignore TODO: いい感じにする
+        dom[
+          name
+        ] =
+          nextProps[
+          name
+          ];
+      },
+    );
 
   // 必要ない・変更されたイベントリスナーの削除
-  Object.keys(prevProps)
-    .filter(isEvent)
-    .filter((key) => !(key in nextProps) || isNew(prevProps, nextProps)(key))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2);
-      dom.removeEventListener(eventType, prevProps[name]);
-    });
+  Object.keys(
+    prevProps,
+  )
+    .filter(
+      isEvent,
+    )
+    .filter(
+      (
+        key,
+      ) =>
+        !(
+          key in
+          nextProps
+        ) ||
+        isNew(
+          prevProps,
+          nextProps,
+        )(
+          key,
+        ),
+    )
+    .forEach(
+      (
+        name,
+      ) => {
+        const eventType =
+          name
+            .toLowerCase()
+            .substring(
+              2,
+            );
+        dom.removeEventListener(
+          eventType,
+          prevProps[
+          name
+          ],
+        );
+      },
+    );
 
   // 新しい・変更されたイベントリスナーの追加
-  Object.keys(nextProps)
-    .filter(isEvent)
-    .filter(isNew(prevProps, nextProps))
-    .forEach((name) => {
-      const eventType = name.toLowerCase().substring(2);
-      dom.addEventListener(eventType, nextProps[name]);
-    });
+  Object.keys(
+    nextProps,
+  )
+    .filter(
+      isEvent,
+    )
+    .filter(
+      isNew(
+        prevProps,
+        nextProps,
+      ),
+    )
+    .forEach(
+      (
+        name,
+      ) => {
+        const eventType =
+          name
+            .toLowerCase()
+            .substring(
+              2,
+            );
+        dom.addEventListener(
+          eventType,
+          nextProps[
+          name
+          ],
+        );
+      },
+    );
 };
 
 const commitDeletion = (fiber: Fiber, parentDom: HTMLElement | Text) => {
@@ -213,9 +332,16 @@ const useState = <T>(initialState: T): [T, (action: (prev: T) => T) => void] => 
 
   const actions = oldHook ? oldHook.queue : [];
 
-  actions.forEach((action) => {
-    hook.state = action(hook.state);
-  });
+  actions.forEach(
+    (
+      action,
+    ) => {
+      hook.state =
+        action(
+          hook.state,
+        );
+    },
+  );
 
   const setState = (action: (prev: T) => T) => {
     hook.queue.push(action);
